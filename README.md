@@ -94,16 +94,28 @@ zusätzlich alle `[data-reveal]` darunter frei — nötig für SVG.
 
 ---
 
-## Vier Fallen, die schon zugeschnappt sind
+## Fünf Fallen, die schon zugeschnappt sind
 
-Alle vier waren im Browser unsichtbar und nur über gemessene Werte zu finden.
 Jede ist jetzt ein Test in `scripts/verify-dom.mjs`.
 
-**1 · `body` darf keinen deckenden Hintergrund haben.**
-Der Hintergrund eines im Fluss liegenden Elements wird **nach** den
-Nachfahren mit negativem `z-index` gemalt. Ein `background` auf `body`
-verdeckt damit Atmosphäre und Sternenfeld vollständig — im DOM völlig
-unauffällig, beide Ebenen sind „da". Der Grundton liegt deshalb nur auf `html`.
+**1 · Der Grundton gehört auf `body` — und die Ebenen darüber.**
+Diese Falle hat zweimal zugeschnappt, aus entgegengesetzten Richtungen.
+
+Zuerst lagen Atmosphäre und Sternenfeld auf negativem `z-index`. Der
+Hintergrund eines im Fluss liegenden Elements wird **nach** solchen
+Nachfahren gemalt — `body { background }` hat beide Ebenen vollständig
+verdeckt. Im DOM völlig unauffällig, beide waren „da".
+
+Die naheliegende Korrektur — den Grundton von `body` nehmen und nur auf
+`html` lassen — machte die Seite **weiß**, sobald sie in ein fremdes
+Dokument eingebettet wurde: dessen Grundgerüst bringt oft ein helles
+`body { background }` mit, das den html-Hintergrund übermalt.
+
+Richtig ist beides zusammen: **`body` trägt den Grundton**, und die
+Hintergrundebenen liegen auf `z-0` darüber, der Inhalt auf `z-10`.
+
+Lehre fürs Prüfen: Eine Seite, die woanders eingebettet wird, muss **in
+diesem Grundgerüst** geprüft werden, nicht nur unter einer nackten URL.
 
 **2 · `pathLength`, `stroke-dasharray` und `--len` müssen übereinstimmen.**
 Weichen sie ab, skaliert der Browser das Strichmuster im Verhältnis der

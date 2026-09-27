@@ -8,7 +8,7 @@
  */
 export function Atmosphere() {
   return (
-    <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-20">
+    <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0">
       <div
         className="absolute inset-0"
         style={{

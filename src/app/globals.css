@@ -56,17 +56,21 @@
    Basis
    ────────────────────────────────────────────────────────────────────────── */
 
-/* Der Grundton liegt ausschließlich auf html.
-   Bekäme body ihn ebenfalls, würde er Atmosphäre und Sternenfeld verdecken:
-   der Hintergrund eines im Fluss liegenden Elements wird nach den Nachfahren
-   mit negativem z-index gemalt, nicht davor. */
 html {
   background: var(--color-ink);
+  color-scheme: dark;
   -webkit-text-size-adjust: 100%;
   scroll-behavior: auto; /* Der Scroll bleibt unangetastet. */
 }
 
+/* Der Grundton MUSS auch auf body liegen.
+   Wird die Seite in ein fremdes Dokument eingebettet — etwa als Vorschau —
+   bringt dessen Grundgerüst oft ein helles `body { background }` mit, das
+   den html-Hintergrund übermalt. Damit die Hintergrundebenen trotzdem
+   sichtbar bleiben, liegen sie NICHT hinter body (negativer z-index),
+   sondern darüber auf z-0; der Inhalt darüber auf z-10. */
 body {
+  background: var(--color-ink);
   color: var(--color-white);
   font-family: var(--font-sans);
   font-feature-settings: "ss01", "ss03";

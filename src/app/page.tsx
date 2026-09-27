@@ -30,7 +30,7 @@ export default function Page() {
       <Starfield />
       <Header />
 
-      <main className="relative">
+      <main className="relative z-10">
         <Hero />
         <Principle />
         <Services />

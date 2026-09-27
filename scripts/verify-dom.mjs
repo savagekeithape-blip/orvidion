@@ -200,11 +200,34 @@ check(odd.length === 0, "eine Easing-Kurve (plus linear für Dauerrotation)",
   check(lit > 30 && peak > 60, "Sternenfeld trägt sichtbar bei",
     `${lit} Pixel aufgehellt, Spitze +${peak.toFixed(0)}`);
 
-  const bodyBg = await page.evaluate(
-    () => getComputedStyle(document.body).backgroundColor,
-  );
-  check(bodyBg === "rgba(0, 0, 0, 0)",
-    "body ohne deckenden Hintergrund (sonst verdeckt er die Ebenen)", bodyBg);
+  // Die Seite muss dunkel sein — auch dann, wenn ein fremdes Grundgerüst
+  // ein helles `body { background }` mitbringt. Genau so wurde die Vorschau
+  // einmal weiß: body war transparent, und der Grundton lag nur auf html,
+  // wo ihn der body des Wirts übermalt hat.
+  const corners = await (async () => {
+    const png = PNG.sync.read(await page.screenshot());
+    return [[20, 20], [1420, 20], [20, 880], [700, 880]].map(([x, y]) => {
+      const i = (png.width * y + x) << 2;
+      return (png.data[i] + png.data[i + 1] + png.data[i + 2]) / 3;
+    });
+  })();
+  check(corners.every((l) => l < 70), "die Seite rendert dunkel",
+    corners.map((l) => l.toFixed(0)).join("/"));
+
+  const layerZ = await page.evaluate(() => {
+    const z = (el) => parseInt(getComputedStyle(el).zIndex || "0", 10) || 0;
+    return {
+      canvas: z(document.querySelector("canvas")),
+      atmosphere: z(document.querySelector('[aria-hidden="true"].fixed.inset-0')),
+      body: getComputedStyle(document.body).backgroundColor,
+    };
+  });
+  // Negative z-index würde die Ebenen hinter jeden body-Hintergrund schieben.
+  check(layerZ.canvas >= 0 && layerZ.atmosphere >= 0,
+    "Hintergrundebenen liegen über body, nicht dahinter",
+    `canvas z=${layerZ.canvas}, Atmosphäre z=${layerZ.atmosphere}`);
+  check(layerZ.body !== "rgba(0, 0, 0, 0)",
+    "body trägt selbst den Grundton (gegen fremde Grundgerüste)", layerZ.body);
 }
 
 // ── Die gescrubbte Szene ──────────────────────────────────────────────────
