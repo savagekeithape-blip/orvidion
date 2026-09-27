@@ -1,26 +1,320 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ──────────────────────────────────────────────────────────────────────────
+   ORVIDION — Tokens
+   Fünf Farben, keine weiteren. Abstufungen entstehen ausschließlich über
+   Opazität derselben Werte, nie über neue Farbtöne.
+   ────────────────────────────────────────────────────────────────────────── */
+
+@theme {
+  --color-ink: #0a0f17;
+  --color-ink-2: #132033;
+  --color-gold: #d4af37;
+  --color-grey: #a7adb4;
+  --color-white: #f5f6f7;
+
+  --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif;
+
+  /* Eine Kurve für die ganze Seite. Lang, weich, kein Overshoot. */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Spacing-Rhythmus auf 8px-Basis */
+  --space-section: clamp(7rem, 14vh, 14rem);
+  --space-gutter: clamp(1.5rem, 5vw, 6rem);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Scroll-Progress einer Sektion. inherits:true, damit Kinder ihn lesen. */
+@property --p {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ──────────────────────────────────────────────────────────────────────────
+   Basis
+   ────────────────────────────────────────────────────────────────────────── */
+
+html {
+  background: var(--color-ink);
+  /* Kein scroll-behavior:smooth — native Scroll bleibt unangetastet.
+     Die Weichheit entsteht im Dämpfen des Scroll-Werts, nicht im Scrollen. */
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-ink);
+  color: var(--color-white);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "ss03";
+  overflow-x: clip;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-gold) 26%, transparent);
+  color: var(--color-white);
+}
+
+:focus-visible {
+  outline: 1px solid var(--color-gold);
+  outline-offset: 3px;
+}
+
+/* Haarlinien. Nie Rahmen, immer Linien. */
+.hairline {
+  background: color-mix(in srgb, var(--color-white) 11%, transparent);
+}
+
+svg .hair {
+  vector-effect: non-scaling-stroke;
+  stroke-width: 0.75;
+  fill: none;
+}
+
+svg .hair-1 {
+  vector-effect: non-scaling-stroke;
+  stroke-width: 1;
+  fill: none;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Typografie
+   ────────────────────────────────────────────────────────────────────────── */
+
+.t-display {
+  font-size: clamp(2.75rem, 7.4vw, 6.75rem);
+  line-height: 0.96;
+  letter-spacing: -0.038em;
+  font-weight: 400;
+}
+
+.t-h2 {
+  font-size: clamp(1.875rem, 4.3vw, 3.5rem);
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+  font-weight: 400;
+}
+
+.t-h3 {
+  font-size: clamp(1.25rem, 1.9vw, 1.75rem);
+  line-height: 1.16;
+  letter-spacing: -0.022em;
+  font-weight: 400;
+}
+
+.t-lead {
+  font-size: clamp(1.0625rem, 1.32vw, 1.3125rem);
+  line-height: 1.62;
+  letter-spacing: -0.012em;
+  color: var(--color-grey);
+}
+
+.t-body {
+  font-size: clamp(0.9375rem, 1.05vw, 1.0625rem);
+  line-height: 1.7;
+  letter-spacing: -0.008em;
+  color: var(--color-grey);
+}
+
+.t-label {
+  font-size: 0.6875rem;
+  line-height: 1;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.t-num {
+  font-size: clamp(2.25rem, 5vw, 4rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Einblendungen
+   Als CSS-Keyframes mit fill-mode:both, ausgelöst durch eine Klasse vom
+   IntersectionObserver. Scriptgesteuerte Werte würden bei gedrosselten
+   Frames halbfertig stehenbleiben — diese können das nicht.
+   ────────────────────────────────────────────────────────────────────────── */
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, var(--rise-from, 1.5rem), 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes draw {
+  from { stroke-dashoffset: var(--len, 1000); }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes widen {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+[data-reveal] {
+  opacity: 0;
+}
+
+[data-reveal].is-in {
+  animation-name: rise;
+  animation-duration: 1400ms;
+  animation-timing-function: var(--ease);
+  animation-fill-mode: both;
+  animation-delay: var(--d, 0ms);
+}
+
+[data-reveal="fade"].is-in { animation-name: fade; }
+
+[data-reveal="line"] {
+  transform: scaleX(0);
+  transform-origin: left center;
+  opacity: 1;
+}
+[data-reveal="line"].is-in {
+  animation-name: widen;
+  animation-duration: 1800ms;
+  animation-timing-function: var(--ease);
+  animation-fill-mode: both;
+  animation-delay: var(--d, 0ms);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Scrubbed-Animationen
+   Eine pausierte Animation mit negativem Delay springt an die Stelle
+   --lp ihrer Laufzeit — und respektiert dabei die Timing-Funktion. So gilt
+   dieselbe Easing-Kurve auch für scroll-getriebene Bewegung.
+   ────────────────────────────────────────────────────────────────────────── */
+
+.scrub {
+  /* lokaler Fortschritt: Fenster [--a, --a + --span] aus --p */
+  --lp: clamp(0, calc((var(--p) - var(--a, 0)) / var(--span, 1)), 1);
+  animation-duration: 1000ms;
+  animation-timing-function: var(--ease);
+  animation-fill-mode: both;
+  animation-play-state: paused;
+  animation-delay: calc(var(--lp) * -1000ms);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Reduced Motion — alles landet im Endzustand, Drift steht still.
+   ────────────────────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal],
+  [data-reveal].is-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .scrub {
+    animation: none !important;
+  }
+  *, *::before, *::after {
+    transition-duration: 1ms !important;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Scrub-Keyframes
+   Endpunkte kommen als CSS-Variablen vom Element. Ein Keyframe bedient damit
+   viele Elemente mit unterschiedlichen Distanzen — und alle laufen auf
+   derselben Easing-Kurve.
+   ────────────────────────────────────────────────────────────────────────── */
+
+@keyframes scrub-move {
+  from {
+    transform: translate3d(var(--x0, 0px), var(--y0, 0px), 0)
+      rotate(var(--r0, 0deg)) scale(var(--s0, 1));
+    opacity: var(--o0, 1);
+  }
+  to {
+    transform: translate3d(var(--x1, 0px), var(--y1, 0px), 0)
+      rotate(var(--r1, 0deg)) scale(var(--s1, 1));
+    opacity: var(--o1, 1);
+  }
+}
+
+@keyframes scrub-draw {
+  from { stroke-dashoffset: var(--len, 1000); }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes scrub-fade {
+  from { opacity: var(--o0, 0); }
+  to { opacity: var(--o1, 1); }
+}
+
+@keyframes scrub-rotate {
+  from { transform: rotate(var(--r0, 0deg)); }
+  to { transform: rotate(var(--r1, 360deg)); }
+}
+
+.scrub-move { animation-name: scrub-move; }
+.scrub-draw { animation-name: scrub-draw; }
+.scrub-fade { animation-name: scrub-fade; }
+.scrub-rotate { animation-name: scrub-rotate; }
+
+/* Ruhige Eigenrotation für das fertige System im Ausklang. */
+@keyframes slow-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Durchlauf: herein, halten, hinaus — für Elemente, die beim Scrollen
+   vorbeiziehen statt nur zu erscheinen. */
+@keyframes scrub-pass {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, var(--pass, 1.5rem), 0);
+  }
+  24%,
+  76% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, calc(var(--pass, 1.5rem) * -1), 0);
+  }
+}
+
+@keyframes scrub-pulse {
+  0%, 100% { opacity: 0; }
+  30%, 70% { opacity: 1; }
+}
+
+.scrub-pass { animation-name: scrub-pass; }
+.scrub-pulse { animation-name: scrub-pulse; }
+
+/* Ausnahme von der Easing-Kurve: eine Schiene, die exakt am Scroll hängen
+   muss. Die Weichheit kommt hier aus der Dämpfung des Scroll-Werts, nicht
+   aus der Kurve — eine gekrümmte Kurve würde die Abstände der Ankünfte
+   ungleich machen. */
+.scrub-linear { animation-timing-function: linear; }
+
+/* Die Streuungs-Knoten liegen auf schmalen Fenstern anders — Inline-Stile
+   kennen keine Media Queries, deshalb hier. */
+.scatter-node {
+  left: var(--nxs);
+  top: var(--nys);
+}
+
+@media (min-width: 40rem) {
+  .scatter-node {
+    left: var(--nx);
+    top: var(--ny);
+  }
 }
