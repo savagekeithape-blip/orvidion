@@ -17,24 +17,50 @@ import { C, NODES, ORBITS, OrbitCore, OrbitDefs } from "@/components/Orbit";
  * ebenfalls, decken sich Prozentangaben und Figurenkoordinaten exakt.
  */
 
-/** Feste Seite je Beschriftung — an der Endlage ausgerichtet, damit sie
- *  unterwegs nicht springt. */
-const MARKS = [
-  { label: "Angebote", side: "r", sx: 300, sy: 330 },
-  { label: "Reporting", side: "l", sx: 700, sy: 300 },
-  { label: "Freigaben", side: "l", sx: 760, sy: 430 },
-  { label: "Verträge", side: "r", sx: 250, sy: 520 },
-  { label: "Onboarding", side: "l", sx: 620, sy: 545 },
-  { label: "Rechnungen", side: "r", sx: 330, sy: 640 },
-  { label: "Stammdaten", side: "l", sx: 780, sy: 690 },
-  { label: "Datenpflege", side: "l", sx: 560, sy: 760 },
-] as const;
+/**
+ * Die acht Abläufe, in der Reihenfolge der Knoten.
+ *
+ * Die Streulage liegt auf demselben Strahl wie die Endlage, nur weiter außen:
+ * dadurch laufen alle Wege radial nach innen und können sich nicht kreuzen.
+ * Mit frei gesetzten Streupunkten überlagerten sich die Beschriftungen mitten
+ * in der Bewegung, auch wenn Anfang und Ende sauber waren.
+ *
+ * Die Radien sind unterschiedlich, damit die Streulage nicht wie ein
+ * gleichmäßiger Kranz wirkt — sie soll ungeordnet aussehen.
+ */
+const LABELS = [
+  "Angebote",
+  "Reporting",
+  "Freigaben",
+  "Verträge",
+  "Onboarding",
+  "Rechnungen",
+  "Stammdaten",
+  "Datenpflege",
+];
 
-const SCATTER = NODES.map((n, i) => ({
-  ...n,
-  ...MARKS[i % MARKS.length],
-  delay: (i % 4) * 0.03,
-}));
+/**
+ * Die Streuradien bleiben unter etwa 350: weiter außen läuft die Beschriftung
+ * eines waagerecht liegenden Knotens aus dem Bild — der Platz, den ein Wort
+ * neben dem Punkt braucht, wächst nicht mit der Figur mit.
+ */
+const SCATTER_R = [345, 330, 352, 318, 340, 306, 348, 326];
+
+const SCATTER = NODES.map((n, i) => {
+  const vx = n.x - C;
+  const vy = n.y - C;
+  const d = Math.hypot(vx, vy) || 1;
+  const r = SCATTER_R[i % SCATTER_R.length];
+  return {
+    ...n,
+    label: LABELS[i % LABELS.length],
+    /** Nach außen beschriftet, weg vom Zentrum. */
+    side: n.x >= C ? ("r" as const) : ("l" as const),
+    sx: C + (vx / d) * r,
+    sy: C + (vy / d) * r,
+    delay: (i % 4) * 0.03,
+  };
+});
 
 /**
  * Zeitplan der Szene.
@@ -42,11 +68,17 @@ const SCATTER = NODES.map((n, i) => ({
  * Die Textstände überlappen bewusst: läuft der erste vollständig aus, bevor
  * der zweite einsetzt, steht mitten im Scrollen ein leeres Bild.
  */
+/** Ein Zeitfenster als CSS-Variablen. Als einfache Schlüssel `a` und `span`
+ *  geschrieben verwirft React sie stillschweigend, und das Element läuft
+ *  über die ganze Strecke statt in seinem Abschnitt. */
+const win = (a: number, span: number) =>
+  ({ "--a": a, "--span": span }) as React.CSSProperties;
+
 const T = {
   nodes: { a: 0.1, span: 0.42 },
-  orbit: (i: number) => ({ a: 0.3 + i * 0.08, span: 0.26 }),
-  core: { a: 0.52, span: 0.18 },
-  spokes: { a: 0.62, span: 0.24 },
+  orbit: (i: number) => win(0.3 + i * 0.08, 0.26),
+  core: win(0.52, 0.18),
+  spokes: win(0.62, 0.24),
   /** Der zweite Stand setzt ein, bevor der erste ganz weg ist. */
   out: { a: 0.4, span: 0.08 },
   in: { a: 0.41, span: 0.08 },
@@ -55,10 +87,45 @@ const T = {
 export function Principle() {
   return (
     <Scene vh={205} id="prinzip">
-      <div className="relative h-full">
-        {/* Das System füllt die Bühne, der Text liegt darüber in den Ecken. */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="relative aspect-square w-[min(86vh,58rem)] max-w-[94vw]">
+      {/* Text links, Figur rechts — getrennte Spalten.
+          Vorher lag der Text über der Figur. Auf einer kleinen, blassen
+          Grafik geht das; auf dieser nicht: die Überschrift lag direkt auf
+          einer Ellipse, und beides wurde dadurch schlechter lesbar. */}
+      <div className="shell grid12 h-full items-center py-[8vh]">
+        <div className="col-span-12 lg:col-span-5">
+          <PhaseStack>
+            <Phase out={T.out}>
+              <p className="t-label mb-6 text-grey">01 — Ausgangslage</p>
+              <h2 className="t-h2">
+                Alles läuft.
+                <br />
+                Nur nichts zusammen.
+              </h2>
+              <p className="t-lead mt-8 max-w-[38ch]">
+                Jeder Bereich funktioniert für sich. Die Arbeit entsteht
+                dazwischen: im Übertragen, Nachfragen und Doppeltpflegen —
+                über den Tag verteilt und deshalb in keiner Kalkulation.
+              </p>
+            </Phase>
+            <Phase in={T.in}>
+              <p className="t-label mb-6 text-gold">02 — Prinzip</p>
+              <h2 className="t-h2">
+                Ein Zentrum.
+                <br />
+                Verbundene Bahnen.
+              </h2>
+              <p className="t-lead mt-8 max-w-[38ch]">
+                Wir stellen kein weiteres Werkzeug daneben. Wir definieren die
+                Mitte — Daten, Regeln, Verantwortlichkeiten — und führen die
+                bestehenden Abläufe darauf zurück. Dieselben Abläufe, nur
+                verbunden.
+              </p>
+            </Phase>
+          </PhaseStack>
+        </div>
+
+        <div className="col-span-12 mt-12 flex justify-center lg:col-span-6 lg:col-start-7 lg:mt-0">
+          <div className="relative aspect-square w-full max-w-[min(72vh,44rem)]">
             <svg viewBox="0 0 1000 1000" className="h-full w-full" aria-hidden="true">
               <OrbitDefs id="core" />
 
@@ -132,10 +199,8 @@ export function Principle() {
               </g>
             </svg>
 
-            {/* Die Beschriftungen wandern mit ihrem Knoten und bleiben stehen.
-                Auf schmalen Fenstern ausgeblendet: dort ist die Figur zu klein,
-                acht Namen wären nur noch Rauschen. */}
-            <div aria-hidden="true" className="absolute inset-0 hidden lg:block">
+            {/* Die Beschriftungen wandern mit ihrem Knoten und bleiben stehen. */}
+            <div aria-hidden="true" className="absolute inset-0 hidden xl:block">
               {SCATTER.map((n) => (
                 <div
                   key={`m-${n.key}`}
@@ -155,7 +220,7 @@ export function Principle() {
                 >
                   <span
                     className={`t-label absolute top-0 -translate-y-1/2 whitespace-nowrap text-grey ${
-                      n.side === "r" ? "left-3.5" : "right-3.5"
+                      n.side === "r" ? "left-3" : "right-3"
                     }`}
                   >
                     {n.label}
@@ -163,53 +228,6 @@ export function Principle() {
                 </div>
               ))}
             </div>
-          </div>
-        </div>
-
-        {/* Überschrift */}
-        <div className="absolute inset-x-0 top-0 pt-[12vh]">
-          <div className="shell">
-            <PhaseStack>
-              <Phase out={T.out}>
-                <p className="t-label mb-6 text-grey">01 — Ausgangslage</p>
-                <h2 className="t-h2">
-                  Alles läuft.
-                  <br />
-                  Nur nichts zusammen.
-                </h2>
-              </Phase>
-              <Phase in={T.in}>
-                <p className="t-label mb-6 text-gold">02 — Prinzip</p>
-                <h2 className="t-h2">
-                  Ein Zentrum.
-                  <br />
-                  Verbundene Bahnen.
-                </h2>
-              </Phase>
-            </PhaseStack>
-          </div>
-        </div>
-
-        {/* Fließtext */}
-        <div className="absolute inset-x-0 bottom-0 pb-[7vh]">
-          <div className="shell grid12">
-            <PhaseStack align="end" className="col-span-12 lg:col-span-5 lg:col-start-8">
-              <Phase out={T.out}>
-                <p className="t-lead">
-                  Jeder Bereich funktioniert für sich. Die Arbeit entsteht
-                  dazwischen: im Übertragen, Nachfragen und Doppeltpflegen —
-                  über den Tag verteilt und deshalb in keiner Kalkulation.
-                </p>
-              </Phase>
-              <Phase in={T.in}>
-                <p className="t-lead">
-                  Wir stellen kein weiteres Werkzeug daneben. Wir definieren die
-                  Mitte — Daten, Regeln, Verantwortlichkeiten — und führen die
-                  bestehenden Abläufe darauf zurück. Dieselben Abläufe, nur
-                  verbunden.
-                </p>
-              </Phase>
-            </PhaseStack>
           </div>
         </div>
       </div>

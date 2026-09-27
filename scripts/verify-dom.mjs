@@ -275,6 +275,36 @@ check(scrub.paused === scrub.total && scrub.animated === scrub.total,
   "alle Scrub-Elemente pausiert und animiert",
   `${scrub.paused}/${scrub.animated}/${scrub.total}`);
 
+/**
+ * Die Choreografie muss tatsächlich greifen.
+ *
+ * Ein Zeitfenster, das als `{ a, span }` statt `{ "--a", "--span" }` gesetzt
+ * wird, verwirft React stillschweigend — das Element fällt dann auf die
+ * Vorgabe 0…1 zurück und läuft über die ganze Strecke. Im DOM sieht das
+ * unauffällig aus; sichtbar wird es nur daran, dass am Anfang der Szene
+ * bereits alles gezeichnet ist.
+ */
+await goTo(scene.top + travel * 0.05);
+const early = await page.evaluate(() => {
+  const el = document.getElementById("prinzip");
+  const shapes = [...el.querySelectorAll("ellipse, line")];
+  const drawn = shapes.filter((n) => {
+    const cs = getComputedStyle(n);
+    return parseFloat(cs.strokeDashoffset) < parseFloat(cs.getPropertyValue("--len")) - 1;
+  }).length;
+  const missing = [...el.querySelectorAll(".scrub")].filter(
+    (n) => getComputedStyle(n).getPropertyValue("--a").trim() === "",
+  ).length;
+  return { total: shapes.length, drawn, missing };
+});
+check(early.drawn === 0,
+  "am Anfang der Szene ist noch keine Bahn gezeichnet",
+  `${early.drawn}/${early.total} bereits gezeichnet`);
+check(early.missing === 0,
+  "jedes Scrub-Element hat sein Zeitfenster (--a gesetzt)",
+  `${early.missing} ohne --a`);
+
+await goTo(scene.top + travel);
 const drawn = await page.evaluate(() =>
   [...document.querySelectorAll("#prinzip [stroke-dasharray]")].map((n) => ({
     pathLength: parseFloat(n.getAttribute("pathLength")),
@@ -291,24 +321,27 @@ check(drawn.every((d) => d.pathLength === d.dash && d.dash === d.len),
 check(drawn.every((d) => d.off < 1.5), "am Ende sind alle Bahnen gezeichnet",
   `max ${Math.max(...drawn.map((d) => d.off)).toFixed(2)}`);
 
-// ── Kopfzeile und Fortschritt ─────────────────────────────────────────────
+// ── Fortschrittslinie ────────────────────────────────────────────────────
+// An dieser Stelle stand eine Navileiste. Sie ist entfernt; übrig bleibt die
+// Orientierung, die auf einer langen Seite wirklich fehlt.
 
-const header = await page.evaluate(() => {
-  const h = document.querySelector("header");
-  const bar = document.querySelector("header")?.previousElementSibling;
-  const m = getComputedStyle(bar).transform.match(/matrix\(([\d.]+)/);
-  return { opacity: getComputedStyle(h).opacity, scaleX: m ? parseFloat(m[1]) : -1 };
+const bar = await page.evaluate(() => {
+  const el = document.querySelector('[class*="origin-left"]');
+  if (!el) return { found: false };
+  const m = getComputedStyle(el).transform.match(/matrix\(([\d.]+)/);
+  return { found: true, scaleX: m ? parseFloat(m[1]) : -1 };
 });
-check(parseFloat(header.opacity) > 0.9, "Kopfzeile ist nach dem Hero sichtbar",
-  header.opacity);
-check(header.scaleX > 0.05 && header.scaleX <= 1,
-  "Fortschrittslinie folgt dem Scroll", header.scaleX.toFixed(3));
-
-await page.evaluate(() => window.scrollTo(0, 0));
-await settle(page, 1400);
+check(bar.found && bar.scaleX > 0.05 && bar.scaleX <= 1,
+  "Fortschrittslinie folgt dem Scroll",
+  bar.found ? bar.scaleX.toFixed(3) : "nicht gefunden");
+// Sektionsköpfe nutzen ebenfalls <header>; gemeint ist die fixierte Leiste.
 check(
-  parseFloat(await page.evaluate(() => getComputedStyle(document.querySelector("header")).opacity)) < 0.1,
-  "Kopfzeile bleibt im Hero verborgen",
+  await page.evaluate(() =>
+    [...document.querySelectorAll("header, nav")].every(
+      (e) => getComputedStyle(e).position !== "fixed",
+    ),
+  ),
+  "keine fixierte Navileiste (bewusst entfernt)",
 );
 
 // ── Einblendungen, auch die im SVG ────────────────────────────────────────

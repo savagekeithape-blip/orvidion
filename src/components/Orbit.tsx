@@ -19,10 +19,16 @@ export type Orbit = {
   gold?: boolean;
 };
 
+/**
+ * Die Winkel sind so gewählt, dass die acht Knoten rund um die Mitte
+ * gleichmäßig alle 45° liegen. Vorher standen drei von ihnen innerhalb von
+ * 40° beieinander, während zwei Viertel der Figur leer blieben — das sah
+ * unausgewogen aus, und die Beschriftungen überlagerten sich zwangsläufig.
+ */
 export const ORBITS: Orbit[] = [
-  { rx: 442, ry: 152, rot: -18, at: [0.5, 2.3, 4.25] },
-  { rx: 328, ry: 286, rot: 26, at: [1.1, 3.45, 5.3] },
-  { rx: 206, ry: 96, rot: -52, at: [0.25, 3.1], gold: true },
+  { rx: 442, ry: 152, rot: -18, at: [1.79, 4.64, 5.73] },
+  { rx: 328, ry: 286, rot: 26, at: [2.102, 4.545, 6.064] },
+  { rx: 206, ry: 96, rot: -52, at: [1.757, 4.517], gold: true },
 ];
 
 /** Punkt auf einer gedrehten Ellipse. */

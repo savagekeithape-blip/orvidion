@@ -115,7 +115,7 @@ zusätzlich alle `[data-reveal]` darunter frei — nötig für SVG.
 
 ---
 
-## Fünf Fallen, die schon zugeschnappt sind
+## Sechs Fallen, die schon zugeschnappt sind
 
 Jede ist jetzt ein Test in `scripts/verify-dom.mjs`.
 
@@ -138,16 +138,24 @@ Hintergrundebenen liegen auf `z-0` darüber, der Inhalt auf `z-10`.
 Lehre fürs Prüfen: Eine Seite, die woanders eingebettet wird, muss **in
 diesem Grundgerüst** geprüft werden, nicht nur unter einer nackten URL.
 
-**2 · `pathLength`, `stroke-dasharray` und `--len` müssen übereinstimmen.**
+**2 · Ein Zeitfenster als `{ a, span }` geht stillschweigend verloren.**
+Die Scrub-Fenster müssen als `{ "--a", "--span" }` ins `style` — mit
+einfachen Schlüsseln verwirft React sie kommentarlos, das Element fällt auf
+die Vorgabe 0…1 zurück und läuft über die ganze Strecke statt in seinem
+Abschnitt. Im DOM sieht das unauffällig aus: sichtbar wird es nur daran,
+dass am Anfang der Szene bereits alles gezeichnet ist. Dafür gibt es den
+Helfer `win(a, span)` und einen Test, der genau das prüft.
+
+**3 · `pathLength`, `stroke-dasharray` und `--len` müssen übereinstimmen.**
 Weichen sie ab, skaliert der Browser das Strichmuster im Verhältnis der
 Längen: eine fertig gezeichnete Linie erscheint **gestrichelt**, obwohl
 `stroke-dashoffset` korrekt auf 0 steht.
 
-**3 · Ein Observer auf dem Wrapper erreicht dessen Kinder nicht.**
+**4 · Ein Observer auf dem Wrapper erreicht dessen Kinder nicht.**
 SVG-Linien und -Punkte mit `data-reveal` blieben für immer auf ihrem
 Startwert. Dafür gibt es `RevealGroup`.
 
-**4 · Kein negativer `rootMargin` unten am Observer.**
+**5 · Kein negativer `rootMargin` unten am Observer.**
 In einer Sticky-Bühne sitzt der Fußbereich dauerhaft am unteren Rand und
 könnte eine solche Schwelle nie überschreiten. Ein gemeinsamer Wächter in
 `Reveal.tsx` fängt zusätzlich alles ab, was am Dokumentende hängenbleibt.
@@ -179,3 +187,27 @@ Voraussetzung: ein laufender Server. Ziel-URL über `VERIFY_URL`.
 - **Keine Kundenlogos, keine Testimonials, keine Fallzahlen.** Die Werte in
   Sektion 05 sind auf der Seite ausdrücklich als Zielkorridore der
   Projektplanung ausgewiesen.
+
+**6 · Beschriftungen an einer Figur brauchen radiale Wege.**
+Acht Punkte laufen beim Scrollen von einer Streulage auf ihre Bahn. Mit frei
+gesetzten Streupunkten überlagerten sich die Beschriftungen **mitten in der
+Bewegung**, obwohl Anfang und Ende sauber waren — die Wege kreuzten sich.
+Liegt die Streulage auf demselben Strahl wie die Endlage, laufen alle Wege
+radial nach innen und können sich nicht kreuzen. Zusätzlich sind die acht
+Knoten gleichmäßig alle 45° verteilt statt gedrängt; vorher lagen drei
+innerhalb von 40°, während zwei Viertel der Figur leer blieben.
+
+Der Test dazu tastet die ganze Szene an 21 Stellen auf vier Bildschirmgrößen
+ab. Ein Test, der nur Anfang und Ende prüft, lässt genau diese Klasse von
+Fehlern durch — so ist sie ursprünglich durchgerutscht.
+
+## Was bewusst nicht da ist
+
+- **Keine Navileiste.** Sie war generisch und hat gegen die ruhige Seite
+  gearbeitet. Übrig bleibt eine goldene Haarlinie als Fortschrittsanzeige.
+- **Keine Atmosphäre-Verläufe.** Eine Fassung mit Farbverläufen im
+  Hintergrund wirkte nach Leuchten. Die Tiefe kommt aus dem dünn besetzten
+  Sternenfeld und der Parallaxe.
+- **Kein Text über der Figur.** Text und Grafik haben getrennte Spalten. Über
+  einer großen, hellen Figur wird Text schlechter lesbar und die Figur
+  schlechter erkennbar.

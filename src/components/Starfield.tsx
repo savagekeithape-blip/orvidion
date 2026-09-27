@@ -23,12 +23,12 @@ type Star = {
   gold: boolean;
 };
 
-// Dichte und Helligkeit sind gemessen, nicht geschätzt: mit der Atmosphäre
-// im Rücken verschwanden 558 Sterne auf 1,3 Millionen Pixeln vollständig.
+// Bewusst dünn besetzt. Eine dichtere Fassung wirkte nicht mehr wie ein
+// ruhiger Nachthimmel, sondern wie Rauschen.
 const DEPTHS = [
-  { count: 620, speed: 0.05, rMin: 0.45, rMax: 0.95, aMin: 0.28, aMax: 0.5 },
-  { count: 340, speed: 0.12, rMin: 0.6, rMax: 1.2, aMin: 0.4, aMax: 0.7 },
-  { count: 130, speed: 0.24, rMin: 0.85, rMax: 1.7, aMin: 0.58, aMax: 1 },
+  { count: 200, speed: 0.055, rMin: 0.4, rMax: 0.8, aMin: 0.24, aMax: 0.44 },
+  { count: 124, speed: 0.13, rMin: 0.55, rMax: 1.05, aMin: 0.34, aMax: 0.6 },
+  { count: 56, speed: 0.26, rMin: 0.75, rMax: 1.4, aMin: 0.5, aMax: 0.85 },
 ];
 
 /** Deterministisch, damit Server und Client nicht auseinanderlaufen. */

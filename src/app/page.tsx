@@ -1,6 +1,5 @@
-import { Atmosphere } from "@/components/Atmosphere";
 import { Starfield } from "@/components/Starfield";
-import { Header } from "@/components/Header";
+import { ScrollProgress } from "@/components/ScrollProgress";
 import { Hero } from "@/components/sections/Hero";
 import { Principle } from "@/components/sections/Principle";
 import { Cases } from "@/components/sections/Cases";
@@ -27,9 +26,8 @@ export default function Page() {
         Zum Inhalt
       </a>
 
-      <Atmosphere />
       <Starfield />
-      <Header />
+      <ScrollProgress />
 
       <main className="relative z-10">
         <Hero />
