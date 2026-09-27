@@ -190,10 +190,10 @@ export function Constellation() {
             </div>
 
             <div
-              className="scrub scrub-fade flex shrink-0 items-center gap-6"
+              className="scrub scrub-fade flex shrink-0 items-start gap-6"
               style={{ "--a": 0.8, "--span": 0.18, "--o0": 0, "--o1": 1 } as React.CSSProperties}
             >
-              <span className="hairline h-px w-12 shrink-0" />
+              <span className="hairline mt-[0.62em] h-px w-12 shrink-0 self-start" />
               <p className="t-h3 text-white">{CLOSING}</p>
             </div>
           </div>
@@ -223,8 +223,8 @@ export function Constellation() {
         </div>
 
         <Reveal delay={200}>
-          <div className="mt-16 flex items-center gap-6">
-            <span className="hairline h-px w-12 shrink-0" />
+          <div className="mt-16 flex items-start gap-6">
+            <span className="hairline mt-[0.62em] h-px w-12 shrink-0 self-start" />
             <p className="t-h3 text-white">{CLOSING}</p>
           </div>
         </Reveal>

@@ -109,7 +109,7 @@ export function Scatter() {
 
             {/* Erscheint erst am Ende der Strecke. */}
             <div
-              className="scrub scrub-fade mt-12 flex items-center gap-6"
+              className="scrub scrub-fade mt-12 flex items-start gap-6"
               style={
                 {
                   "--a": 0.62,
@@ -119,9 +119,12 @@ export function Scatter() {
                 } as React.CSSProperties
               }
             >
-              <span className="hairline h-px w-12 shrink-0" />
-              <p className="t-h3 max-w-[30ch] text-white">
-                Kein Werkzeug fehlt. Die Verbindung fehlt.
+              {/* Linie an der ersten Zeile ausrichten, nicht am Block. */}
+              <span className="hairline mt-[0.62em] h-px w-12 shrink-0 self-start" />
+              <p className="t-h3 text-white">
+                Kein Werkzeug fehlt.
+                <br />
+                Die Verbindung fehlt.
               </p>
             </div>
           </div>
