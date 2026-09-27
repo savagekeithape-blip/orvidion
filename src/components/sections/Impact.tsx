@@ -60,25 +60,6 @@ export function Impact() {
           </div>
         </Reveal>
 
-        {/* Was wir nicht zeigen — und warum. */}
-        <Reveal delay={200} className="mt-20">
-          <div className="grid12 gap-y-8">
-            <div className="col-span-12 lg:col-span-5">
-              <h3 className="t-h3 max-w-[22ch] text-balance">
-                Sie finden hier keine Logos und keine Testimonials.
-              </h3>
-            </div>
-            <div className="col-span-12 lg:col-span-6 lg:col-start-7">
-              <p className="t-body max-w-[56ch]">
-                Das ist eine Entscheidung, keine Auslassung. ORVIDION ist jung,
-                und fremde Logos auf einer Startseite sagen ohnehin nichts über
-                die Arbeit. Was wir belegen können, belegen wir im Gespräch — an
-                einem Ihrer Abläufe, mit offenem Aufwand und offener Grenze.
-                Wenn sich Automatisierung nicht lohnt, sagen wir das.
-              </p>
-            </div>
-          </div>
-        </Reveal>
       </div>
     </section>
   );

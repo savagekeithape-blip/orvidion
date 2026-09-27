@@ -31,7 +31,7 @@ export function Contact() {
         <div className="grid12">
           <div className="col-span-12 lg:col-span-7">
             <Reveal kind="fade" className="flex items-baseline gap-5">
-              <span className="t-ordinal">06</span>
+              <span className="t-ordinal">07</span>
               <span className="t-label text-grey">Kontakt</span>
             </Reveal>
             <Reveal delay={140}>
@@ -40,10 +40,10 @@ export function Contact() {
               </h2>
             </Reveal>
             <Reveal delay={300}>
-              <p className="t-lead mt-9 max-w-[46ch]">
-                Ein Gespräch, dreißig Minuten. Wir sehen uns einen konkreten
-                Prozess an und sagen offen, ob und wo sich Automatisierung
-                rechnet.
+              <p className="t-lead mt-9 max-w-[48ch]">
+                Dreißig Minuten, ohne Vorbereitung Ihrerseits. Sie beschreiben
+                einen Ablauf, wir sagen Ihnen, ob er sich eignet und was eine
+                Analyse kosten würde. Wenn nicht, sagen wir auch das.
               </p>
             </Reveal>
 

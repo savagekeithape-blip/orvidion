@@ -6,9 +6,9 @@ import { CONTACT } from "@/content";
 
 const NAV = [
   { href: "#prinzip", label: "Prinzip" },
-  { href: "#leistungen", label: "Leistungen" },
+  { href: "#anwendungsfaelle", label: "Anwendungsfälle" },
   { href: "#ablauf", label: "Ablauf" },
-  { href: "#wirkung", label: "Wirkung" },
+  { href: "#klartext", label: "Klartext" },
 ];
 
 /**

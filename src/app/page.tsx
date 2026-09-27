@@ -3,9 +3,10 @@ import { Starfield } from "@/components/Starfield";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/sections/Hero";
 import { Principle } from "@/components/sections/Principle";
-import { Services } from "@/components/sections/Services";
+import { Cases } from "@/components/sections/Cases";
 import { Process } from "@/components/sections/Process";
 import { Impact } from "@/components/sections/Impact";
+import { Answers } from "@/components/sections/Answers";
 import { Contact } from "@/components/sections/Contact";
 
 /**
@@ -33,9 +34,10 @@ export default function Page() {
       <main className="relative z-10">
         <Hero />
         <Principle />
-        <Services />
+        <Cases />
         <Process />
         <Impact />
+        <Answers />
         <Contact />
       </main>
     </>

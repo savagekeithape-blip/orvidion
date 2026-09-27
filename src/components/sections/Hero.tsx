@@ -2,7 +2,7 @@
 
 import { Reveal } from "@/components/Reveal";
 import { OrbitSystem } from "@/components/Orbit";
-import { CLAIM } from "@/content";
+import { CLAIM, CONTACT } from "@/content";
 
 const KEYWORDS = ["KI-Automatisierung", "Verbundene Abläufe", "Messbarer Effekt"];
 
@@ -80,11 +80,35 @@ export function Hero() {
             </h1>
 
             <Reveal delay={800}>
-              <p className="t-lead mt-9 max-w-[44ch]">
-                ORVIDION verbindet die Abläufe in Ihrem Unternehmen zu einem
-                Ganzen — mit KI-Automatisierung, die Handarbeit messbar ersetzt
-                statt sie zu verschieben.
+              <p className="t-lead mt-9 max-w-[46ch]">
+                ORVIDION verbindet Ihre Abläufe zu einem System und
+                automatisiert die Handarbeit dazwischen — Angebote,
+                Rechnungseingang, Stammdaten. Erst die Struktur, dann die
+                Technik. Sonst automatisiert man das Chaos mit.
               </p>
+            </Reveal>
+
+            {/* Zwei Wege: ein verbindlicher und ein unverbindlicher. Ein
+                einzelner Knopf verliert alle, die erst schauen wollen. */}
+            <Reveal delay={940}>
+              <div className="mt-11 flex flex-wrap items-center gap-x-9 gap-y-5">
+                <a
+                  href={`mailto:${CONTACT.email}?subject=Analyse%20eines%20Ablaufs`}
+                  className="group t-label inline-flex items-center gap-4 border border-gold/60 px-8 py-4 text-gold transition-colors duration-700 ease-(--ease) hover:border-gold hover:bg-gold hover:text-ink"
+                >
+                  Book an Analysis
+                  <span
+                    aria-hidden="true"
+                    className="block h-px w-5 bg-gold transition-[width] duration-700 ease-(--ease) group-hover:w-8 group-hover:bg-ink"
+                  />
+                </a>
+                <a
+                  href="#anwendungsfaelle"
+                  className="t-label border-b border-white/25 pb-1 text-grey transition-colors duration-700 ease-(--ease) hover:border-white hover:text-white"
+                >
+                  Anwendungsfälle ansehen
+                </a>
+              </div>
             </Reveal>
           </div>
         </div>

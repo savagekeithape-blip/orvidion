@@ -337,3 +337,58 @@ svg .hair-thin {
   .spin { animation: none !important; }
   *, *::before, *::after { transition-duration: 1ms !important; }
 }
+
+/* Ortswechsel: verschiebt ein absolut gesetztes Element zwischen zwei Lagen
+   in Prozent seines Containers. Wird für die Beschriftungen der Knoten
+   gebraucht — als SVG-Text skalierten sie mit der Figur und waren auf
+   schmalen Fenstern nur noch fünf Pixel hoch. */
+@keyframes scrub-place {
+  from {
+    left: var(--lx0);
+    top: var(--ly0);
+  }
+  to {
+    left: var(--lx1);
+    top: var(--ly1);
+  }
+}
+
+.scrub-place { animation-name: scrub-place; }
+
+/* Wechsel zwischen zwei Textständen.
+   Bewusst linear und überlappend: die Haupt-Easing-Kurve ist stark
+   vorderlastig — der ausblendende Stand wäre nach einem Viertel seines
+   Fensters schon fast weg, bevor der nächste einsetzt. Dazwischen stünde
+   mitten im Scrollen ein leeres Bild. Die kleine Bewegung macht aus der
+   kurzen Überlagerung einen Wechsel statt zweier übereinanderliegender Texte. */
+@keyframes phase-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 1rem, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes phase-out {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, -1rem, 0);
+  }
+}
+
+.phase-in {
+  animation-name: phase-in;
+  animation-timing-function: linear;
+}
+
+.phase-out {
+  animation-name: phase-out;
+  animation-timing-function: linear;
+}

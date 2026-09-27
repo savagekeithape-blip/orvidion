@@ -366,11 +366,19 @@ const honesty = await page.evaluate(() => {
   const t = document.body.innerText.replace(/\s+/g, " ");
   return {
     korridor: /Zielkorridore aus unserer Projektplanung/.test(t),
-    keine: /keine Logos und keine Testimonials/.test(t),
+    // Die Seite muss offen sagen, dass es keine Kundenlogos gibt, statt
+    // die Lücke stillschweigend zu lassen.
+    keine: /keine Kundenlogos/.test(t),
+    // Und die Einwände müssen beantwortet sein, nicht nur behauptet.
+    betrvg: /§ ?87 BetrVG/.test(t),
+    eu: /europäischen Rechenzentren/.test(t),
   };
 });
 check(honesty.korridor, "Zahlen sind als Zielkorridore ausgewiesen");
-check(honesty.keine, "Hinweis, dass es keine Logos/Testimonials gibt");
+check(honesty.keine, "Hinweis, dass es keine Kundenlogos gibt");
+check(honesty.betrvg && honesty.eu,
+  "Einwände beantwortet: Mitbestimmung und Datenstandort",
+  `BetrVG ${honesty.betrvg}, EU ${honesty.eu}`);
 
 check(errors.length === 0, "keine Konsolen- oder Netzwerkfehler",
   errors.slice(0, 3).join(" | "));

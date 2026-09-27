@@ -1,10 +1,10 @@
 /**
  * Atmosphäre.
  *
- * Vorher lag alles auf reinem #0A0F17 — das wirkt platt, egal wie gut die
- * Typografie sitzt. Zwei sehr weiche Verläufe in der zweiten Markenfarbe
- * geben der Fläche Volumen, eine Randabdunklung fasst sie ein. Beides sind
- * dieselben fünf Farben in unterschiedlicher Deckkraft, keine Schatten.
+ * Bewusst sehr zurückhaltend: zwei kaum wahrnehmbare Verläufe in der zweiten
+ * Markenfarbe und eine weiche Randabdunklung. Eine kräftigere Fassung wirkte
+ * zu sehr nach Leuchten — die Galaxie soll ruhig bleiben, die Tiefe kommt aus
+ * dem Sternenfeld und der Parallaxe, nicht aus dem Hintergrund.
  */
 export function Atmosphere() {
   return (
@@ -13,8 +13,8 @@ export function Atmosphere() {
         className="absolute inset-0"
         style={{
           backgroundImage: [
-            "radial-gradient(70rem 50rem at 78% 8%, color-mix(in srgb, var(--color-ink-2) 85%, transparent), transparent 62%)",
-            "radial-gradient(60rem 46rem at 12% 74%, color-mix(in srgb, var(--color-ink-2) 58%, transparent), transparent 60%)",
+            "radial-gradient(64rem 46rem at 78% 6%, color-mix(in srgb, var(--color-ink-2) 30%, transparent), transparent 66%)",
+            "radial-gradient(56rem 42rem at 10% 78%, color-mix(in srgb, var(--color-ink-2) 18%, transparent), transparent 64%)",
           ].join(","),
         }}
       />
@@ -23,7 +23,7 @@ export function Atmosphere() {
         className="absolute inset-0"
         style={{
           backgroundImage:
-            "radial-gradient(120% 90% at 50% 45%, transparent 42%, var(--color-ink) 100%)",
+            "radial-gradient(130% 100% at 50% 45%, transparent 52%, var(--color-ink) 100%)",
         }}
       />
     </div>

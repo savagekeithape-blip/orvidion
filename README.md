@@ -19,13 +19,14 @@ npm run verify       # DOM- und Pixelprüfung gegen den laufenden Server
 | # | Sektion | Datei | Höhe |
 |---|---------|-------|------|
 | — | Hero | `sections/Hero.tsx` | 1,0 Bildschirm |
-| 01/02 | Streuung → Kern | `sections/Principle.tsx` | 2,3 (gescrubbt) |
-| 03 | Leistungen | `sections/Services.tsx` | 1,3 |
-| 04 | Ablauf | `sections/Process.tsx` | 1,3 |
-| 05 | Wirkung | `sections/Impact.tsx` | 1,3 |
-| 06 | Kontakt | `sections/Contact.tsx` | 1,0 |
+| 01/02 | Streuung → Kern | `sections/Principle.tsx` | 2,1 (gescrubbt) |
+| 03 | Anwendungsfälle | `sections/Cases.tsx` | 1,8 |
+| 04 | Ablauf | `sections/Process.tsx` | 1,4 |
+| 05 | Wirkung | `sections/Impact.tsx` | 1,1 |
+| 06 | Klartext | `sections/Answers.tsx` | 1,2 |
+| 07 | Kontakt | `sections/Contact.tsx` | 1,0 |
 
-Zusammen rund 7.400 px. **Nur eine Sektion setzt sich beim Scrollen fest.**
+Zusammen rund 8.500 px. **Nur eine Sektion setzt sich beim Scrollen fest.**
 Das ist die eigentliche Entscheidung dieses Aufbaus: Wenn sich jede Sektion
 festsetzt, ist keine davon ein Moment — dann ist Scrollen nur noch Leerlauf.
 
@@ -38,7 +39,27 @@ zeigt es fertig und in Ruhe. Geometrie und Verläufe liegen gemeinsam in
 
 In der Szene sind die acht verstreuten, beschrifteten Abläufe **dieselben**
 acht Knoten, die danach auf den Bahnen sitzen. Man sieht nicht zwei Bilder,
-sondern eine Auflösung.
+sondern eine Auflösung. Die Namen bleiben bis zum Schluss stehen: am Ende
+zeigt die Figur genau die Abläufe, mit denen sie angefangen hat, nur geordnet.
+
+## Warum die Inhalte so stehen
+
+Recherchiert an dem, was vergleichbare Anbieter tun, und bewusst anders, wo
+Ehrlichkeit es verlangt:
+
+- **Anwendungsfälle statt Leistungsliste.** Wer Automatisierung sucht, erkennt
+  sich an der Beschreibung seines Alltags wieder, nicht an einer
+  Technologieliste. Deshalb steht jedem Ablauf ein „Heute" gegenüber.
+- **Klartext statt Versprechen.** Datenschutz, EU AI Act, Mitbestimmung nach
+  § 87 BetrVG und Abhängigkeit sind die Gründe, an denen Projekte im
+  Mittelstand tatsächlich hängenbleiben. Die Mitbestimmung spricht kaum
+  jemand vorher an — genau deshalb steht sie da.
+- **Zwei Einstiege.** Ein verbindlicher und ein unverbindlicher. Ein
+  einzelner Knopf verliert alle, die erst schauen wollen.
+- **Keine Logoleiste, keine Testimonials.** Fast alle Vergleichsseiten haben
+  beides. Wir haben keine echten, und erfundene kommen nicht in Frage. Die
+  Frage „Warum stehen hier keine Kundenlogos?" steht stattdessen offen im
+  Klartext.
 
 ---
 
