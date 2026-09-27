@@ -1,51 +1,42 @@
+import { Atmosphere } from "@/components/Atmosphere";
 import { Starfield } from "@/components/Starfield";
-import { Arrival } from "@/components/sections/Arrival";
-import { Scatter } from "@/components/sections/Scatter";
-import { Core } from "@/components/sections/Core";
-import { Orbits } from "@/components/sections/Orbits";
-import { Constellation } from "@/components/sections/Constellation";
+import { Header } from "@/components/Header";
+import { Hero } from "@/components/sections/Hero";
+import { Principle } from "@/components/sections/Principle";
+import { Services } from "@/components/sections/Services";
+import { Process } from "@/components/sections/Process";
 import { Impact } from "@/components/sections/Impact";
-import { Close } from "@/components/sections/Close";
+import { Contact } from "@/components/sections/Contact";
 
 /**
- * Die Seite ist ein einziges Orbitalsystem, über Zeit betrachtet.
+ * Ein Orbitalsystem, über die Seite hinweg.
  *
- * Oben verstreute, unverbundene Punkte. Unten ein geschlossenes System mit
- * einem Kern. Dazwischen findet es sich — das ist der Firmensatz, gezeichnet
- * statt behauptet.
+ * Der Hero zeigt es angeschnitten, die eine gescrubbte Szene baut es aus
+ * verstreuten Punkten zusammen, der Ausklang zeigt es fertig und in Ruhe.
+ * Dazwischen scrollt alles normal — nur eine Szene setzt sich fest, sonst
+ * wäre keine davon ein Moment.
  */
 export default function Page() {
   return (
     <>
       <a
-        href="#leistungen"
+        href="#prinzip"
         className="t-label sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:bg-gold focus:px-5 focus:py-3 focus:text-ink"
       >
         Zum Inhalt
       </a>
 
-      {/* Durchlaufendes Sternenfeld, drei Parallax-Ebenen. */}
+      <Atmosphere />
       <Starfield />
+      <Header />
 
       <main className="relative">
-        <Arrival />
-        <Scatter />
-        <Core />
-        <Orbits />
-        <Constellation />
-
-        {/* Zweite Fläche: eigene Ebene für den ruhigen Teil am Ende.
-            Die Kanten laufen weich aus, damit keine harte Naht entsteht. */}
-        <div className="relative">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-ink-2/55 [mask-image:linear-gradient(to_bottom,transparent,black_12rem,black_calc(100%-12rem),transparent)]"
-          />
-          <div className="relative">
-            <Impact />
-            <Close />
-          </div>
-        </div>
+        <Hero />
+        <Principle />
+        <Services />
+        <Process />
+        <Impact />
+        <Contact />
       </main>
     </>
   );

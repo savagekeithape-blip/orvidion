@@ -9,34 +9,36 @@ npm install
 npm run dev          # Entwicklung
 npm run build        # statischer Produktionsbau
 npm start -- -p 4300 # Produktionsserver
-npm run verify       # DOM-Prüfung gegen den laufenden Server
+npm run verify       # DOM- und Pixelprüfung gegen den laufenden Server
 ```
 
 ---
 
+## Aufbau
+
+| # | Sektion | Datei | Höhe |
+|---|---------|-------|------|
+| — | Hero | `sections/Hero.tsx` | 1,0 Bildschirm |
+| 01/02 | Streuung → Kern | `sections/Principle.tsx` | 2,3 (gescrubbt) |
+| 03 | Leistungen | `sections/Services.tsx` | 1,3 |
+| 04 | Ablauf | `sections/Process.tsx` | 1,3 |
+| 05 | Wirkung | `sections/Impact.tsx` | 1,3 |
+| 06 | Kontakt | `sections/Contact.tsx` | 1,0 |
+
+Zusammen rund 7.400 px. **Nur eine Sektion setzt sich beim Scrollen fest.**
+Das ist die eigentliche Entscheidung dieses Aufbaus: Wenn sich jede Sektion
+festsetzt, ist keine davon ein Moment — dann ist Scrollen nur noch Leerlauf.
+
 ## Die Leitidee
 
-Die Seite ist kein Stapel Sektionen mit Weltraum-Deko, sondern **ein einziges
-Orbitalsystem, über Zeit betrachtet.** Scrollen bewegt nicht die Seite —
-Scrollen bringt das System voran.
+Ein Orbitalsystem, über die Seite hinweg. Der Hero zeigt es angeschnitten,
+die gescrubbte Szene baut es aus verstreuten Punkten zusammen, der Ausklang
+zeigt es fertig und in Ruhe. Geometrie und Verläufe liegen gemeinsam in
+`components/Orbit.tsx`, damit überall dasselbe Objekt erscheint.
 
-Oben verstreute, unverbundene Punkte. Unten ein geschlossenes System mit einem
-Kern. Dazwischen findet es sich. Das ist der Firmensatz, gezeichnet statt
-behauptet.
-
-| # | Sektion | Datei | Strecke |
-|---|---------|-------|---------|
-| — | Ankunft | `sections/Arrival.tsx` | 190 vh |
-| 01 | Streuung — die Ausgangslage | `sections/Scatter.tsx` | 260 vh |
-| 02 | Der Kern — das Prinzip | `sections/Core.tsx` | 420 vh |
-| 03 | Bahnen — die Leistungen | `sections/Orbits.tsx` | 480 vh |
-| 04 | Konstellation — der Ablauf | `sections/Constellation.tsx` | 360 vh |
-| 05 | Wirkung — Zielwerte | `sections/Impact.tsx` | läuft durch |
-| 06 | Ausklang — Kontakt | `sections/Close.tsx` | läuft durch |
-
-Die `vh`-Werte steuern das Tempo: **längere Strecke = langsamere Bewegung pro
-gescrolltem Pixel.** Sie sind der eine Regler, an dem man die Ruhe der Seite
-einstellt. Sie stehen jeweils im `<Scene vh={…}>` der Sektion.
+In der Szene sind die acht verstreuten, beschrifteten Abläufe **dieselben**
+acht Knoten, die danach auf den Bahnen sitzen. Man sieht nicht zwei Bilder,
+sondern eine Auflösung.
 
 ---
 
@@ -44,24 +46,18 @@ einstellt. Sie stehen jeweils im `<Scene vh={…}>` der Sektion.
 
 ### Der gedämpfte Scroll-Wert
 
-`src/lib/scroll.ts` hält **eine** rAF-Schleife für die ganze Seite.
+`src/lib/scroll.ts` hält eine einzige rAF-Schleife.
 
-Das Scrollen selbst wird nicht angetastet — kein Smooth-Scroll-Hijacking, das
-fühlt sich sofort billig an und zerstört Trackpad-Verhalten und
-Barrierefreiheit. Stattdessen läuft ein zweiter, gedämpfter Wert dem rohen
-Scroll-Fortschritt weich nach (Lerp pro Frame, frame-rate-normalisiert, damit
-60 Hz und 120 Hz identisch aussehen).
-
-Dieser gedämpfte Wert landet als CSS-Variable `--p` (0…1) auf der Sektion.
-**Das ist der Kern des Gefühls:** Zittern verschwindet, Bewegung bekommt Masse
-statt direkt am Finger zu kleben. Der Dämpfungsfaktor ist `DAMP` in
-`scroll.ts` — höher heißt direkter, niedriger heißt träger.
+Das Scrollen selbst wird nicht angetastet — kein Smooth-Scroll-Hijacking.
+Stattdessen läuft ein zweiter, gedämpfter Wert dem rohen Scroll-Fortschritt
+weich nach (Lerp pro Frame, frame-rate-normalisiert). Er landet als
+CSS-Variable `--p` (0…1) auf der Sektion. Zittern verschwindet, Bewegung
+bekommt Masse. Der Dämpfungsfaktor ist `DAMP`.
 
 ### Scroll-gebundene Animation
 
-Eine **pausierte** CSS-Animation mit negativem `animation-delay` springt an die
-Stelle `--lp` ihrer Laufzeit und respektiert dabei ihre Timing-Funktion. So
-gilt dieselbe Easing-Kurve auch für scroll-getriebene Bewegung:
+Eine **pausierte** CSS-Animation mit negativem `animation-delay` springt an
+die Stelle `--lp` ihrer Laufzeit und respektiert dabei ihre Timing-Funktion:
 
 ```css
 .scrub {
@@ -71,78 +67,82 @@ gilt dieselbe Easing-Kurve auch für scroll-getriebene Bewegung:
 }
 ```
 
-`--a` ist der Anfang des Fensters, `--span` seine Länge — beides pro Element.
-So staffeln sich Bahnen, Knoten und Text innerhalb einer Sektion.
+`--a` ist der Anfang des Fensters, `--span` seine Länge — je Element. So
+staffeln sich Bahnen, Knoten und Text innerhalb der Szene.
 
 ### Einblendungen
 
-Als CSS-Keyframes mit `animation-fill-mode: both`, ausgelöst durch eine Klasse
-vom `IntersectionObserver` (`components/Reveal.tsx`). Scriptgesteuerte Werte
-blieben bei gedrosselten Frames halbfertig stehen; diese können das nicht.
+CSS-Keyframes mit `animation-fill-mode: both`, ausgelöst durch eine Klasse
+vom `IntersectionObserver` (`components/Reveal.tsx`). `RevealGroup` schaltet
+zusätzlich alle `[data-reveal]` darunter frei — nötig für SVG.
 
 ---
 
 ## Regeln, an die sich der Code hält
 
-Die DOM-Prüfung (`npm run verify`) setzt jede davon durch.
+`npm run verify` setzt jede davon durch.
 
 | | |
 |---|---|
-| **Fünf Farben** | `#0A0F17` `#132033` `#D4AF37` `#A7ADB4` `#F5F6F7`. Abstufungen nur über Opazität derselben Werte, nie über neue Farbtöne. |
-| **Gold ist selten** | Nur Haarlinien, Knoten, kleine Sternglyphen — nie als Fläche. Genau **ein** gefüllter goldener Knopf auf der ganzen Seite. |
-| **Eine Kurve** | `cubic-bezier(0.16, 1, 0.3, 1)` überall. Einzige Ausnahme: `.scrub-linear` für die Bahn der Leistungen, die exakt am Scroll hängen muss — eine gekrümmte Kurve würde die Abstände der Ankünfte ungleich machen. |
-| **Keine Schatten** | Tiefe entsteht durch Parallax-Geschwindigkeit und Opazitätsbänder, nicht durch Schatten. Radien nie über 2 px. |
-| **Alles prozedural** | Sterne auf Canvas, Bahnen und Sternbilder als SVG. Keine Bilder, keine Illustrationen. |
-| **Reduced Motion** | Alles landet sofort im Endzustand, Drift steht still. |
+| **Fünf Farben** | `#0A0F17` `#132033` `#D4AF37` `#A7ADB4` `#F5F6F7`. Abstufungen nur über Opazität derselben Werte. |
+| **Gold ist selten** | Haarlinien, Knoten, Sternglyphen — nie als Fläche. Genau **ein** gefüllter goldener Knopf auf der Seite. |
+| **Eine Kurve** | `cubic-bezier(0.16, 1, 0.3, 1)`. `linear` nur für die Dauerrotation des fertigen Systems. |
+| **Keine Schatten** | Tiefe entsteht aus Parallax, Verläufen und Opazitätsbändern. Radien nie über 2 px. |
+| **Ein Raster** | `.shell` und `.grid12`, ein Maß für alle Sektionen. |
+| **Alles prozedural** | Sterne auf Canvas, Bahnen und Sternbilder als SVG. Keine Bilddateien. |
+| **Reduced Motion** | Alles landet sofort im Endzustand. |
 
 ---
 
-## Zwei Fallen, die schon zugeschnappt sind
+## Vier Fallen, die schon zugeschnappt sind
 
-Beide waren im Browser unsichtbar und nur über gemessene Werte zu finden.
-Deshalb stehen sie hier — und als Test in `scripts/verify-dom.mjs`.
+Alle vier waren im Browser unsichtbar und nur über gemessene Werte zu finden.
+Jede ist jetzt ein Test in `scripts/verify-dom.mjs`.
 
-**1 · `pathLength`, `stroke-dasharray` und `--len` müssen übereinstimmen.**
-Weichen sie voneinander ab, skaliert der Browser das Strichmuster im Verhältnis
-der beiden Längen, und eine fertig gezeichnete Linie erscheint **gestrichelt** —
-obwohl `stroke-dashoffset` korrekt auf 0 steht. Der gemeinsame Wert ist
-`DRAW_LENGTH` in `components/Scene.tsx`. Er ist absichtlich größer als jede
-Kontur der Seite, damit die Linie auch ohne `pathLength`-Unterstützung sauber
-verdeckt startet.
+**1 · `body` darf keinen deckenden Hintergrund haben.**
+Der Hintergrund eines im Fluss liegenden Elements wird **nach** den
+Nachfahren mit negativem `z-index` gemalt. Ein `background` auf `body`
+verdeckt damit Atmosphäre und Sternenfeld vollständig — im DOM völlig
+unauffällig, beide Ebenen sind „da". Der Grundton liegt deshalb nur auf `html`.
 
-**2 · Kein negativer `rootMargin` unten am Observer.**
-In einer Sticky-Bühne sitzt der Fußbereich dauerhaft am unteren Viewport-Rand.
-Eine Schwelle wie `-12%` könnte er nie überschreiten — er bliebe für immer auf
-`opacity: 0`. Zusätzlich fängt ein gemeinsamer Wächter in `Reveal.tsx` alles ab,
-was am Dokumentende hängenbleibt.
+**2 · `pathLength`, `stroke-dasharray` und `--len` müssen übereinstimmen.**
+Weichen sie ab, skaliert der Browser das Strichmuster im Verhältnis der
+Längen: eine fertig gezeichnete Linie erscheint **gestrichelt**, obwohl
+`stroke-dashoffset` korrekt auf 0 steht.
+
+**3 · Ein Observer auf dem Wrapper erreicht dessen Kinder nicht.**
+SVG-Linien und -Punkte mit `data-reveal` blieben für immer auf ihrem
+Startwert. Dafür gibt es `RevealGroup`.
+
+**4 · Kein negativer `rootMargin` unten am Observer.**
+In einer Sticky-Bühne sitzt der Fußbereich dauerhaft am unteren Rand und
+könnte eine solche Schwelle nie überschreiten. Ein gemeinsamer Wächter in
+`Reveal.tsx` fängt zusätzlich alles ab, was am Dokumentende hängenbleibt.
 
 ---
 
 ## Prüfung
 
-`npm run verify` misst **den DOM-Zustand, nicht Screenshots** — Klassen,
-berechnete Stile, CSS-Variablen, `stroke-dashoffset`, und an drei Stellen die
-gerenderten Pixel. Screenshots verschweigen genau die Fehler, die hier zählen:
-hängengebliebene Einblendungen, in der Sticky-Bühne abgeschnittener Text, und
-Linien, die trotz korrektem DOM gestrichelt erscheinen.
+`npm run verify` misst den DOM-Zustand und an drei Stellen die gerenderten
+Pixel — Screenshots allein verschweigen hängengebliebene Einblendungen und
+in der Sticky-Bühne abgeschnittenen Text, der DOM allein verschweigt
+gestrichelte Linien und verdeckte Hintergrundebenen.
 
-Geprüft wird unter anderem: Farbpalette, Schattenfreiheit, eine Easing-Kurve,
-`--p` über die volle Scrolltiefe jeder Szene, Vollständigkeit aller
-Einblendungen, kein horizontaler Überlauf und kein abgeschnittener Text auf
-sieben Viewports, Beschriftungen an ihren Knoten, Reduced Motion, Konsole.
+Geprüft werden unter anderem: Farbpalette, Schattenfreiheit, eine
+Easing-Kurve, Sichtbarkeit der Hintergrundebenen, `--p` über die volle
+Scrolltiefe, Vollständigkeit aller Einblendungen inklusive der im SVG,
+Kopfzeile und Fortschrittslinie, acht Viewports auf Beschnitt und Überlauf,
+Reduced Motion, Konsole.
 
-Voraussetzung: ein laufender Server. Ziel-URL über `VERIFY_URL`,
-Vorgabe `http://localhost:4300/`.
+Voraussetzung: ein laufender Server. Ziel-URL über `VERIFY_URL`.
 
 ---
 
 ## Was noch fehlt
 
 - **`kontakt@orvidion.de`** in `src/content.ts` ist ein Platzhalter.
-- **Impressum und Datenschutz** (`src/app/impressum`, `src/app/datenschutz`)
-  sind leere Hüllen. Für eine deutsche Unternehmensseite rechtlich nötig; der
-  Inhalt muss von ORVIDION kommen, deshalb steht dort bewusst nichts Erfundenes.
+- **Impressum und Datenschutz** sind leere Hüllen. Rechtlich nötig; der
+  Inhalt muss von ORVIDION kommen, deshalb steht dort nichts Erfundenes.
 - **Keine Kundenlogos, keine Testimonials, keine Fallzahlen.** Die Werte in
   Sektion 05 sind auf der Seite ausdrücklich als Zielkorridore der
-  Projektplanung ausgewiesen. Wenn echte Messwerte vorliegen, gehören sie dorthin
-  — mit derselben Deutlichkeit gekennzeichnet.
+  Projektplanung ausgewiesen.

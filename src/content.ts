@@ -80,8 +80,8 @@ export const TARGETS = [
     note: "vom Analysegespräch bis in den Betrieb",
   },
   {
-    value: "1 Datenmodell",
-    label: "statt gewachsener Parallelstrukturen",
-    note: "eine Quelle für alles, was mehrfach gepflegt wurde",
+    value: "1 Modell",
+    label: "ein Datenmodell statt gewachsener Parallelstrukturen",
+    note: "eine Quelle für alles, was vorher mehrfach gepflegt wurde",
   },
 ];

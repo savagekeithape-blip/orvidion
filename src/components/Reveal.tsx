@@ -11,6 +11,8 @@ import { useEffect, useRef, type ElementType, type ReactNode } from "react";
  * unsichtbar geblieben. Ein gemeinsamer Wächter deckt genau diesen Fall ab.
  */
 const pending = new Set<Element>();
+/** Elemente, die beim Freischalten mehr tun als is-in zu setzen. */
+const lighters = new WeakMap<Element, () => void>();
 let guardBound = false;
 
 function bindGuard() {
@@ -22,7 +24,9 @@ function bindGuard() {
       document.documentElement.scrollHeight - 4;
     if (!atEnd) return;
     for (const el of pending) {
-      el.classList.add("is-in");
+      const fn = lighters.get(el);
+      if (fn) fn();
+      else el.classList.add("is-in");
       pending.delete(el);
     }
   };
@@ -89,6 +93,77 @@ export function Reveal({
     <Tag
       ref={ref}
       data-reveal={kind}
+      className={className}
+      style={{ ...style, "--d": `${delay}ms` } as React.CSSProperties}
+    >
+      {children}
+    </Tag>
+  );
+}
+
+/**
+ * Wie `Reveal`, schaltet aber zusätzlich alle `[data-reveal]` darunter frei.
+ *
+ * Nötig für SVG: dort sollen einzelne Linien und Punkte gestaffelt erscheinen,
+ * aber ein eigener Observer je Linie wäre Unfug. Ohne das bleiben die Kinder
+ * für immer auf ihrem Startwert stehen — genau das ist der Figur im Ablauf
+ * passiert.
+ */
+export function RevealGroup({
+  as: Tag = "div",
+  delay = 0,
+  className = "",
+  style,
+  children,
+}: {
+  as?: ElementType;
+  delay?: number;
+  className?: string;
+  style?: React.CSSProperties;
+  children?: ReactNode;
+}) {
+  const ref = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const light = () => {
+      el.classList.add("is-in");
+      for (const child of el.querySelectorAll("[data-reveal]")) {
+        child.classList.add("is-in");
+      }
+    };
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      light();
+      return;
+    }
+    pending.add(el);
+    lighters.set(el, light);
+    bindGuard();
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            light();
+            pending.delete(el);
+            io.unobserve(e.target);
+          }
+        }
+      },
+      { rootMargin: "0px", threshold: 0.01 },
+    );
+    io.observe(el);
+    return () => {
+      pending.delete(el);
+      io.disconnect();
+    };
+  }, []);
+
+  return (
+    <Tag
+      ref={ref}
+      data-reveal="fade"
       className={className}
       style={{ ...style, "--d": `${delay}ms` } as React.CSSProperties}
     >

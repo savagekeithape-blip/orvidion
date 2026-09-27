@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="de" className={`${spaceGrotesk.variable} antialiased`}>
-      <body className="bg-ink text-white">{children}</body>
+      <body className="text-white">{children}</body>
     </html>
   );
 }
