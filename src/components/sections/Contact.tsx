@@ -19,14 +19,6 @@ export function Contact() {
         <OrbitSystem id="close" spin className="h-full w-full" />
       </div>
 
-      {/* Auf schmalen Fenstern hinter dem Text statt daneben. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute top-[46%] left-1/2 aspect-square w-[124vw] -translate-x-1/2 -translate-y-1/2 opacity-40 lg:hidden"
-      >
-        <OrbitSystem id="close-sm" spin className="h-full w-full" />
-      </div>
-
       <div className="shell relative">
         <div className="grid12">
           <div className="col-span-12 lg:col-span-7">

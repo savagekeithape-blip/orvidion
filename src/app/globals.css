@@ -338,23 +338,6 @@ svg .hair-thin {
   *, *::before, *::after { transition-duration: 1ms !important; }
 }
 
-/* Ortswechsel: verschiebt ein absolut gesetztes Element zwischen zwei Lagen
-   in Prozent seines Containers. Wird für die Beschriftungen der Knoten
-   gebraucht — als SVG-Text skalierten sie mit der Figur und waren auf
-   schmalen Fenstern nur noch fünf Pixel hoch. */
-@keyframes scrub-place {
-  from {
-    left: var(--lx0);
-    top: var(--ly0);
-  }
-  to {
-    left: var(--lx1);
-    top: var(--ly1);
-  }
-}
-
-.scrub-place { animation-name: scrub-place; }
-
 /* Wechsel zwischen zwei Textständen.
    Bewusst linear und überlappend: die Haupt-Easing-Kurve ist stark
    vorderlastig — der ausblendende Stand wäre nach einem Viertel seines

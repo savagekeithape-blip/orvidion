@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { Scene } from "@/components/Scene";
 import { C, NODES, ORBITS, OrbitCore, OrbitDefs } from "@/components/Orbit";
 
@@ -51,13 +52,19 @@ const SCATTER = NODES.map((n, i) => {
   const vy = n.y - C;
   const d = Math.hypot(vx, vy) || 1;
   const r = SCATTER_R[i % SCATTER_R.length];
+  const sx = C + (vx / d) * r;
+  const sy = C + (vy / d) * r;
   return {
     ...n,
     label: LABELS[i % LABELS.length],
     /** Nach außen beschriftet, weg vom Zentrum. */
     side: n.x >= C ? ("r" as const) : ("l" as const),
-    sx: C + (vx / d) * r,
-    sy: C + (vy / d) * r,
+    sx,
+    sy,
+    /** Versatz als Anteil der Figurbreite — mit `--fig` wird daraus ein
+     *  Pixelwert für eine Transformation. */
+    dx: (sx - n.x) / 1000,
+    dy: (sy - n.y) / 1000,
     delay: (i % 4) * 0.03,
   };
 });
@@ -75,7 +82,10 @@ const win = (a: number, span: number) =>
   ({ "--a": a, "--span": span }) as React.CSSProperties;
 
 const T = {
-  nodes: { a: 0.1, span: 0.42 },
+  /** Früh, damit die Figur sofort auf die erste Rad-Rastung reagiert. Bei
+   *  0,1 lagen rund 110px Scroll vor der ersten Bewegung — die Szene fühlte
+   *  sich in ihren ersten Frames tot an. */
+  nodes: { a: 0.05, span: 0.42 },
   orbit: (i: number) => win(0.3 + i * 0.08, 0.26),
   core: win(0.52, 0.18),
   spokes: win(0.62, 0.24),
@@ -85,13 +95,27 @@ const T = {
 };
 
 export function Principle() {
+  const fig = useRef<HTMLDivElement>(null);
+
+  // Die Figurbreite als CSS-Variable, damit der Streu-Versatz der
+  // Beschriftungen in Pixeln ausgedrückt werden kann.
+  useEffect(() => {
+    const el = fig.current;
+    if (!el) return;
+    const set = () => el.style.setProperty("--fig", `${el.clientWidth}px`);
+    set();
+    const ro = new ResizeObserver(set);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   return (
-    <Scene vh={205} id="prinzip">
+    <Scene vh={240} id="prinzip">
       {/* Text links, Figur rechts — getrennte Spalten.
           Vorher lag der Text über der Figur. Auf einer kleinen, blassen
           Grafik geht das; auf dieser nicht: die Überschrift lag direkt auf
           einer Ellipse, und beides wurde dadurch schlechter lesbar. */}
-      <div className="shell grid12 h-full items-center py-[8vh]">
+      <div className="shell grid h-full grid-cols-1 content-center gap-y-4 py-[5vh] lg:grid-cols-12 lg:items-center lg:gap-x-8 lg:gap-y-0 lg:py-[8vh]">
         <div className="col-span-12 lg:col-span-5">
           <PhaseStack>
             <Phase out={T.out}>
@@ -124,8 +148,20 @@ export function Principle() {
           </PhaseStack>
         </div>
 
-        <div className="col-span-12 mt-12 flex justify-center lg:col-span-6 lg:col-start-7 lg:mt-0">
-          <div className="relative aspect-square w-full max-w-[min(72vh,44rem)]">
+        {/* Rund um die Figur bleibt Platz für die Beschriftungen frei. Ohne
+            diese Reserve liefen sie aus dem Bild, sobald die Figur die Spalte
+            ausfüllte — deshalb waren sie vorher unterhalb von 1280px ganz
+            ausgeblendet und fehlten genau dort, wo man die Seite ansieht.
+
+            Gestapelt sitzt oben im Kasten eine leere Krone: der äußerste
+            Streupunkt liegt bei etwa 0,69 des Halbmessers, der Kasten ist aber
+            quadratisch. Ohne den Zug nach oben klafft zwischen Text und Figur
+            ein totes Band. */}
+        <div className="-mt-[7%] flex justify-center lg:mt-0 lg:col-span-6 lg:col-start-7">
+          <div
+            ref={fig}
+            className="relative aspect-square w-full max-w-[min(56vh,34rem)] sm:max-w-[min(56vh,34rem,calc(100%-8rem))] lg:max-w-[min(64vh,40rem,calc(100%-8rem))]"
+          >
             <svg viewBox="0 0 1000 1000" className="h-full w-full" aria-hidden="true">
               <OrbitDefs id="core" />
 
@@ -200,19 +236,23 @@ export function Principle() {
             </svg>
 
             {/* Die Beschriftungen wandern mit ihrem Knoten und bleiben stehen. */}
-            <div aria-hidden="true" className="absolute inset-0 hidden xl:block">
+            <div aria-hidden="true" className="absolute inset-0 hidden sm:block">
               {SCATTER.map((n) => (
                 <div
                   key={`m-${n.key}`}
-                  className="scrub scrub-place absolute"
+                  data-mark=""
+                  className="scrub scrub-move absolute"
                   style={
                     {
                       "--a": T.nodes.a + n.delay,
                       "--span": T.nodes.span,
-                      "--lx0": `${n.sx / 10}%`,
-                      "--ly0": `${n.sy / 10}%`,
-                      "--lx1": `${n.x / 10}%`,
-                      "--ly1": `${n.y / 10}%`,
+                      // Bewegung als Transformation, nicht über left/top:
+                      // sonst rechnet der Browser in jedem Frame das Layout
+                      // für acht Elemente neu.
+                      "--x0": `calc(${n.dx} * var(--fig, 0px))`,
+                      "--y0": `calc(${n.dy} * var(--fig, 0px))`,
+                      "--x1": "0px",
+                      "--y1": "0px",
                       left: `${n.x / 10}%`,
                       top: `${n.y / 10}%`,
                     } as React.CSSProperties

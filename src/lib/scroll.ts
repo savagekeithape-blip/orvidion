@@ -12,7 +12,11 @@
  * Thrashing entsteht.
  */
 
-const DAMP = 0.085; // pro 60Hz-Frame angestrebter Anteil der Restdistanz
+// Eine Rad-Rastung sind rund 100px. Bei 0,085 hat die Figur davon nach dem
+// ersten Frame schon 10px zurückgelegt — das liest sich als Ruck, nicht als
+// Gleiten. Weicher gedämpft verteilt sich dieselbe Rastung auf mehr Frames;
+// der Preis ist etwas mehr Nachlauf, und genau der soll hier teuer wirken.
+const DAMP = 0.062; // pro 60Hz-Frame angestrebter Anteil der Restdistanz
 const EPS = 0.0002; // unter dieser Änderung wird nicht geschrieben
 
 type Target = {

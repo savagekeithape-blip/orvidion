@@ -24,13 +24,10 @@ export function Hero() {
       >
         <OrbitSystem id="hero" spin className="h-full w-full" />
       </div>
-      {/* Auf schmalen Fenstern hinter dem Text, deutlich zurückgenommen. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute top-[38%] left-1/2 aspect-square w-[130vw] -translate-x-1/2 -translate-y-1/2 opacity-45 lg:hidden"
-      >
-        <OrbitSystem id="hero-sm" spin className="h-full w-full" />
-      </div>
+      {/* Unterhalb von `lg` steht hier bewusst keine Grafik.
+          Eine großflächige Fassung hinter dem Text hat die Bahnen quer durch
+          Wortmarke und Überschrift laufen lassen — beides wurde dadurch
+          schlechter lesbar. Das Sternenfeld trägt den Hero dort allein. */}
 
       {/* Kopf */}
       <div className="relative pt-7">

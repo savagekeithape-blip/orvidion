@@ -496,6 +496,72 @@ log("");
   await p.close();
 }
 
+// ── Die Streuszene auf Panelbreiten ───────────────────────────────────────
+// Geprüft wurde lange nur bei 1440px. Im schmalen Seitenpanel, in dem die
+// Seite tatsächlich angesehen wird, waren die acht Beschriftungen gar nicht
+// da (sie hingen an `xl:`) — der Szene fehlte genau ihr Text.
+
+log("");
+for (const [w, h] of [[760, 900], [900, 800], [980, 900], [1180, 800]]) {
+  const p = await browser.newPage({ viewport: { width: w, height: h } });
+  await p.goto(URL, { waitUntil: "networkidle" });
+  const r = await p.evaluate(async () => {
+    const sec = document.getElementById("prinzip");
+    const travel = sec.offsetHeight - window.innerHeight;
+    const stage = sec.querySelector(":scope > .sticky");
+    const bad = [];
+    let seen = 0;
+    for (const f of [0, 0.2, 0.4, 0.7, 1]) {
+      window.scrollTo(0, sec.offsetTop + travel * f);
+      await new Promise((r) => setTimeout(r, 1400));
+      const sr = stage.getBoundingClientRect();
+      const marks = [...stage.querySelectorAll("[data-mark] span")]
+        .filter((m) => m.getClientRects().length)
+        .map((m) => ({ r: m.getBoundingClientRect(), t: m.textContent }));
+      seen = Math.max(seen, marks.length);
+      const texts = [...stage.querySelectorAll("h2, p")].filter(
+        (e) =>
+          e.getClientRects().length &&
+          parseFloat(getComputedStyle(e.closest("[class*=phase]") || e).opacity) > 0.15,
+      );
+      const hits = (a, b) =>
+        Math.min(a.right, b.right) - Math.max(a.left, b.left) > 0 &&
+        Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 0;
+
+      for (let i = 0; i < marks.length; i++)
+        for (let j = i + 1; j < marks.length; j++)
+          if (hits(marks[i].r, marks[j].r))
+            bad.push(`p=${f} "${marks[i].t}"x"${marks[j].t}"`);
+
+      for (const m of marks) {
+        for (const t of texts)
+          if (hits(m.r, t.getBoundingClientRect()))
+            bad.push(`p=${f} "${m.t}" auf Text`);
+        const out = Math.max(
+          m.r.right - sr.right, sr.left - m.r.left,
+          m.r.bottom - sr.bottom, sr.top - m.r.top,
+        );
+        if (out > 1) bad.push(`p=${f} "${m.t}" ${Math.round(out)}px raus`);
+      }
+
+      // Gegen das Gezeichnete messen, nicht gegen den SVG-Kasten: der ist
+      // quadratisch, die Figur füllt ihn nicht, und gestapelt zieht der Text
+      // bewusst in die leere Krone darüber.
+      const drawn = [...stage.querySelectorAll("svg circle, svg ellipse, svg line")]
+        .map((e) => e.getBoundingClientRect())
+        .filter((b) => b.width > 0.5 && b.height > 0.5);
+      for (const t of texts) {
+        const tr = t.getBoundingClientRect();
+        if (drawn.some((d) => hits(d, tr))) bad.push(`p=${f} Text auf der Figur`);
+      }
+    }
+    return { bad: [...new Set(bad)], seen };
+  });
+  check(r.seen === 8, `${w}px: alle acht Abläufe beschriftet`, `${r.seen}/8`);
+  check(r.bad.length === 0, `${w}px: nichts überlagert sich`, r.bad.slice(0, 3).join(" | "));
+  await p.close();
+}
+
 // ── Reduced Motion ────────────────────────────────────────────────────────
 
 log("");
